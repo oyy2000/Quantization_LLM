@@ -11,6 +11,39 @@ import traceback
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+model_mapping = {
+    "OriDragon2000/llama2-7b-chat-nf4": "llama2-7b-nf4",
+    "OriDragon2000/llama2-7b-gptq-w3-g128": "llama2-7b-gptq-w3",
+    "OriDragon2000/llama2-7b-gptq-w4-g128": "llama2-7b-gptq-w4",
+    "TheBloke/Llama-2-7B-GPTQ": "llama2-7b-gptq-w4",
+    "andrew-ye/Llama-2-13b-chat-hf-awq-4bit": "llama2-13b-awq-w4",
+    "baichuan-inc/Baichuan-13B-Chat": "baichuan-13b",
+    "baichuan-inc/Baichuan2-13B-chat": "baichuan2-13b",
+    "01-ai/Yi-34B-Chat": "yi-34b",
+    "THUDM/chatglm2-6b": "chatglm2",
+    "THUDM/chatglm3-6b": "chatglm3",
+    "lmsys/vicuna-13b-v1.3": "vicuna-13b",
+    "lmsys/vicuna-7b-v1.3": "vicuna-7b",
+    "lmsys/vicuna-33b-v1.3": "vicuna-33b",
+    "meta-llama/Llama-2-7b-chat-hf": "llama2-7b",
+    "meta-llama/Llama-2-13b-chat-hf": "llama2-13b",
+    "meta/meta-llama-3-70b-instruct":"llama3-70b",
+    "meta/meta-llama-3-8b-instruct":"llama3-8b",
+    "TheBloke/koala-13B-HF": "koala-13b",
+    "OpenAssistant/oasst-sft-4-pythia-12b-epoch-3.5": "oasst-12b",
+    "WizardLM/WizardLM-13B-V1.2": "wizardlm-13b",
+    "mistralai/Mixtral-8x7B-Instruct-v0.1": "mixtral-8x7B",
+    "meta-llama/Llama-2-70b-chat-hf": "llama2-70b",
+    "mistralai/Mistral-7B-Instruct-v0.1": "mistral-7b",
+    "databricks/dolly-v2-12b": "dolly-12b",
+    "bison-001": "bison-001",
+    "ernie": "ernie",
+    "chatgpt": "chatgpt",
+    "gpt-4": "gpt-4",
+    "claude-2": "claude-2",
+    "glm-4": "glm-4",
+    "glm-3-turbo": "glm-3-turbo"
+}
 
 def load_json(file_path):
     with open(file_path, 'r', encoding='utf-8') as f:
@@ -44,6 +77,7 @@ class LLMGeneration:
         self.debug = debug
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         self.use_tuned_prompt = use_tuned_prompt
+        self.model_name = model_mapping.get(self.model_path, "")
 
     def _generation_hf(self, prompt, tokenizer, model, temperature):
         """
