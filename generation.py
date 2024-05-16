@@ -302,10 +302,12 @@ class LLMGeneration:
         model_name = self.model_name
         print(f"Beginning generation with {self.test_type} evaluation at temperature {self.temperature}.")
         print(f"Evaluation target model: {model_name}")
-        
-        model = AutoAWQForCausalLM.from_quantized(self.model_path, fuse_layers=True)
-        tokenizer = AutoTokenizer.from_pretrained(self.model_path)
-       
+        if "awq" in model_name:
+            model = AutoAWQForCausalLM.from_quantized(self.model_path, fuse_layers=True)
+            tokenizer = AutoTokenizer.from_pretrained(self.model_path)
+        else: 
+            model = AutoModelForCausalLM.from_pretrained(self.model_path, device_map = "auto")
+            tokenizer = AutoTokenizer.from_pretrained(self.model_path)
 
         test_functions = {
             'robustness': self.run_robustness,
