@@ -1,7 +1,7 @@
 import time
 import torch
 from transformers import AutoModelForCausalLM, BitsAndBytesConfig, AutoTokenizer
-from awq import AutoAWQForCausalLM
+
 import os
 import json
 import threading
@@ -98,6 +98,9 @@ class LLMGeneration:
 
         inputs = tokenizer([final_prompt])
         inputs = {k: torch.tensor(v).to(self.device) for k, v in inputs.items()}
+        if "meta-llama" in self.model_path:
+            model.generation_config.temperature=None
+            model.generation_config.top_p=None
         output_ids = model.generate(
             **inputs,
             do_sample=True if temperature > 1e-5 else False,
@@ -235,7 +238,7 @@ class LLMGeneration:
         base_dir = os.path.join(self.data_path, 'ethics')
         file_config = {
             # "awareness.json": 0.0,
-            # 'explicit_moralchoice.json': 1.0,x
+            # 'explicit_moralchoice.json': 1.0,
             "implicit_ETHICS.json": 0.0,
             # "implicit_SocialChemistry101.json": 0.0
         }
@@ -265,10 +268,10 @@ class LLMGeneration:
         base_dir = os.path.join(self.data_path, 'truthfulness')
         file_config = {
             # 'external.json': 0.0,
-            # 'hallucination.json': 0.0,
+            'hallucination.json': 0.0,
             # "golden_advfactuality.json": 1.0,
             # "internal.json": 1.0,
-            "sycophancy.json": 1.0
+            # "sycophancy.json": 1.0
         }
         self._run_task(model_name, model, tokenizer, base_dir, file_config)
 
@@ -303,7 +306,7 @@ class LLMGeneration:
         print(f"Beginning generation with {self.test_type} evaluation at temperature {self.temperature}.")
         print(f"Evaluation target model: {model_name}")
         if "awq" in model_name:
-            model = AutoAWQForCausalLM.from_quantized(self.model_path, fuse_layers=True)
+            # model = AutoAWQForCausalLM.from_quantized(self.model_path, fuse_layers=True)
             tokenizer = AutoTokenizer.from_pretrained(self.model_path)
         else: 
             model = AutoModelForCausalLM.from_pretrained(self.model_path, device_map = "auto")
